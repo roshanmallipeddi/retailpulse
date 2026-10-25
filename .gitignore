@@ -1,9 +1,10 @@
-# Secrets and environment files
+# Secrets and local config
 .env
 .env.*
 !.env.example
 *.pem
 *.key
+secrets/
 
 # Python
 __pycache__/
@@ -11,13 +12,32 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
 
-# Editor and operating system
-.vscode/
+# Data (generated data never goes in Git)
+data/
+*.csv
+*.parquet
+!tests/fixtures/**/*.csv
+
+# Notebooks
+.ipynb_checkpoints/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+
+# Databricks
+.databricks/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
 .idea/
 .DS_Store
 Thumbs.db
-
-# Local data and logs
-data/
-*.log
+~$*.xlsx
