@@ -28,3 +28,5 @@ RetailPulse will ingest an operational orders database, clickstream events and p
 
 ## Progress log
 See `docs/learning-log.md`.
+
+_Review workflow verified on 2026-10-25._
