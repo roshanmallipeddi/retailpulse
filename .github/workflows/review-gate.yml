@@ -1,0 +1,43 @@
+name: review-gate
+
+# Blocks merging until Claude has approved the latest commit.
+# Claude Code adds the `claude-approved` label only on an APPROVE verdict.
+# Any new commit removes the label, so every push needs a fresh review.
+# Make `review-gate` a required status check in branch protection for `main`.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: review-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reset approval when new commits arrive
+        if: github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'claude-approved')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr edit "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --remove-label claude-approved
+          echo "New commits pushed: approval reset. Run /review again."
+
+      - name: Require Claude approval on the current commit
+        env:
+          APPROVED: ${{ github.event.action != 'synchronize' && contains(github.event.pull_request.labels.*.name, 'claude-approved') }}
+        run: |
+          if [ "$APPROVED" != "true" ]; then
+            echo "::error::Claude approval is missing for the latest commit. Run /review <PR number> in Claude Code."
+            exit 1
+          fi
+          echo "Claude approval present for this commit."
